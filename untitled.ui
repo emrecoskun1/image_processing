@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>929</width>
+    <height>699</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="documentMode">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="goruntuyu_isle_button">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>410</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>GÖRÜNTÜYÜ İŞLE</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>300</y>
+      <width>121</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>DOSYA SEÇ</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>410</y>
+      <width>301</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="frame">
+     <bool>true</bool>
+    </property>
+    <item>
+     <property name="text">
+      <string>Gri Dönüşüm</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Binary Dönüşüm</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Görüntü Döndürme </string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Görüntü Kırpma </string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Görüntü Yaklaştırma /Uzaklaştırma</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Renk Uzayı Dönüşümleri</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Histogram ve Orjinal Görüntü Histogramını Germe/Genişletme</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>İki resim arasında aritmetik işlemler (ekleme, bölme)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Kontrast Arttırma</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Konvolüsyon İşlemi (mean)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Eşikleme işlemleri (Tek Eşikleme)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Kenar Bulma Algoritmalarının Kullanımı (prewitt)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Görüntüye Gürültü Ekleme (Salt&amp;Pepper) ve filtrelerin kullanımı (mean, median) ile gürültü temizleme</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Görüntüye Filtre Uygulanması (Unsharp)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Morfolojik İşlemler (Genişleme, Aşınma, Açma, Kapama)</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>310</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>300</y>
+      <width>121</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>DOSYA SEÇ</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit_2">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>310</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>929</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

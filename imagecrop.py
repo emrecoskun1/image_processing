@@ -1,9 +1,11 @@
 from PIL import Image
 
-def custom_cropp(image_path, x1, y1, x2, y2):
+def custom_crop(image_path, x1, y1, x2, y2):
     try:
+        
         # Görüntüyü yükle
         image = Image.open(image_path)
+        width, height = image.size
         
         # Görüntüyü RGB modunda yükle
         img_array = image.convert("RGB")
@@ -21,17 +23,8 @@ def custom_cropp(image_path, x1, y1, x2, y2):
         cropped_image = Image.new("RGB", (x2 - x1, y2 - y1))
         cropped_image.putdata([pixel for row in cropped_img_array for pixel in row])
         
-        # Kırpılmış görüntüyü göster
-        cropped_image.show()
+        return cropped_image
     
     except Exception as e:
         print("Hata:", e)
-
-# Örnek kullanım
-image_path = r"C:\Users\yunusemrecoskun\Desktop\vesikalik.jpeg"
-x1, y1, x2, y2 = 100, 100, 600,600  # Kırpma sınırları
-custom_cropp(pimage_path, x1, y1, x2, y2)
-
-
-
 

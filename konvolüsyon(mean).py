@@ -1,5 +1,7 @@
-import numpy as np
 import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 def convolution(image, kernel):
     """
@@ -33,7 +35,7 @@ def convolution(image, kernel):
     return output
 
 # Resmin yolunu belirle
-image_path = r"C:\Users\yunusemrecoskun\Desktop\vesikalik.jpeg"  # Resmin yolunu buraya yazın
+image_path = r"/Users/sevvalgencel/Desktop/X/ornek.jpg"  # Resmin yolunu buraya yazın
 
 # Resmi yükle
 original_image = cv2.imread(image_path)
@@ -48,12 +50,26 @@ kernel = np.ones((3,3), np.float32) / 9
 # Ortalama filtre uygulayalım
 mean_filtered_image = convolution(noisy_image, kernel)
 
-# Orijinal, gri, gürültülü ve ortalama uygulanmış resimleri gösterelim
-cv2.imshow("Orijinal Resim", original_image)
-cv2.imshow("Gri Tonlamalı Resim", gray_image)
-cv2.imshow("Gürültülü Resim", noisy_image)
-cv2.imshow("Ortalama Filtre Uygulanmış Resim", mean_filtered_image.astype(np.uint8))
+fig, axs = plt.subplots(1, 4, figsize=(20, 5))
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# Orijinal resmi göster
+axs[0].imshow(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
+axs[0].set_title('Orijinal Resim')
 
+# Gri tonlamalı resmi göster
+axs[1].imshow(gray_image, cmap='gray')
+axs[1].set_title('Gri Tonlamalı Resim')
+
+# Gürültülü resmi göster
+axs[2].imshow(noisy_image, cmap='gray')
+axs[2].set_title('Gürültülü Resim')
+
+# Ortalama filtre uygulanmış resmi göster
+axs[3].imshow(mean_filtered_image, cmap='gray')
+axs[3].set_title('Ortalama Filtre Uygulanmış Resim')
+
+# Alt resimler arasındaki boşlukları sıkıştır
+plt.tight_layout()
+
+# Görüntüleri göster
+plt.show()

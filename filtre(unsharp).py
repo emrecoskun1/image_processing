@@ -45,6 +45,8 @@ image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 # Unsharp maskesi filtresini uygula
 filtered_image = unsharp_mask(image, kernel_size=(3, 3), sigma=1.0, strength=1.5)
 
+#test
+
 cv2.imshow("Filtered Image", filtered_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()

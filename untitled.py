@@ -10,9 +10,11 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QLineEdit,
 )
+import matplotlib.pyplot as plt
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt
 import cv2
+import numpy as np
 from rotate_image import rotate_image
 from convert_gray import convert_gray
 from convert_to_binary import convert_to_binary
@@ -20,6 +22,7 @@ from contrast import adjust_contrast
 from zoomin_zoomout import zoom_image
 from prewitt_edge_detection import prewitt_edge_detection
 from imagecrop import custom_crop
+from convolution import convolution
 
 
 class ImageProcessingApp(QWidget):
@@ -79,6 +82,7 @@ class ImageProcessingApp(QWidget):
         self.function_selector.addItem("Yakınlaştırma ve Uzaklaştırma")
         self.function_selector.addItem("Kenar Bulma (Prewitt)")
         self.function_selector.addItem("Fotoğraf Kırpma")
+        self.function_selector.addItem("Konvolüsyon İşlemi(Mean Filtresi)")
         self.function_selector.currentIndexChanged.connect(self.show_parameter_input)
 
         layout = QVBoxLayout()
@@ -157,6 +161,43 @@ class ImageProcessingApp(QWidget):
         elif selected_function == "Kenar Bulma (Prewitt)":
             prewitt_image = prewitt_edge_detection(self.image_path)
             prewitt_image.show()
+        elif selected_function == "Konvolüsyon İşlemi(Mean Filtresi)":
+            original_image = cv2.imread(self.image_path)
+            # Ortalama filtre için kernel tanımlayalım
+            kernel = np.ones((3, 3), np.float32) / 9
+
+            # Gürültülü resmi yükleyelim
+            gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
+            noisy_image = gray_image + np.random.normal(0, 25, gray_image.shape).astype(
+                np.uint8
+            )
+
+            # Ortalama filtre uygulayalım
+            mean_filtered_image = convolution(noisy_image, kernel)
+
+            fig, axs = plt.subplots(1, 4, figsize=(20, 5))
+
+            # Orijinal resmi göster
+            axs[0].imshow(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
+            axs[0].set_title("Orijinal Resim")
+
+            # Gri tonlamalı resmi göster
+            axs[1].imshow(gray_image, cmap="gray")
+            axs[1].set_title("Gri Tonlamalı Resim")
+
+            # Gürültülü resmi göster
+            axs[2].imshow(noisy_image, cmap="gray")
+            axs[2].set_title("Gürültülü Resim")
+
+            # Ortalama filtre uygulanmış resmi göster
+            axs[3].imshow(mean_filtered_image, cmap="gray")
+            axs[3].set_title("Ortalama Filtre Uygulanmış Resim")
+
+            # Alt resimler arasındaki boşlukları sıkıştır
+            plt.tight_layout()
+
+            # Görüntüleri göster
+            plt.show()
         elif selected_function == "Yakınlaştırma ve Uzaklaştırma":
             scale_factor = float(self.parameter_input_zoom.text())
             if scale_factor <= 0:

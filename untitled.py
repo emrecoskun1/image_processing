@@ -23,6 +23,9 @@ from zoomin_zoomout import zoom_image
 from prewitt_edge_detection import prewitt_edge_detection
 from imagecrop import custom_crop
 from convolution import convolution
+from filtre_unsharp import unsharp_mask
+from histogram_germe import histogram_stretching
+from histogram_germe import calculate_histogram
 
 
 class ImageProcessingApp(QWidget):
@@ -83,6 +86,8 @@ class ImageProcessingApp(QWidget):
         self.function_selector.addItem("Kenar Bulma (Prewitt)")
         self.function_selector.addItem("Fotoğraf Kırpma")
         self.function_selector.addItem("Konvolüsyon İşlemi(Mean Filtresi)")
+        self.function_selector.addItem("Unsharp Filtresi")
+        self.function_selector.addItem("Histogram Germe")
         self.function_selector.currentIndexChanged.connect(self.show_parameter_input)
 
         layout = QVBoxLayout()
@@ -161,6 +166,46 @@ class ImageProcessingApp(QWidget):
         elif selected_function == "Kenar Bulma (Prewitt)":
             prewitt_image = prewitt_edge_detection(self.image_path)
             prewitt_image.show()
+        elif selected_function == "Unsharp Filtresi":
+            image = cv2.imread(self.image_path, cv2.IMREAD_GRAYSCALE)
+            filtered_image = unsharp_mask(
+                image, kernel_size=(3, 3), sigma=1.0, strength=1.5
+            )
+            cv2.imshow("Filtered Image", filtered_image)
+        elif selected_function == "Histogram Germe":
+            original_image = cv2.imread(self.image_path)
+            gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
+            # Histogram germe işlemini gerçekleştir
+            stretched_image = histogram_stretching(gray_image)
+
+            # Orijinal görüntü, gerilmiş görüntü ve histogramları tek bir çerçeve içinde göster
+            fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+
+            # Orijinal görüntü
+            axes[0, 0].imshow(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
+            axes[0, 0].set_title("Original Image")
+            axes[0, 0].axis("off")
+
+            # Gerilmiş görüntü
+            axes[0, 1].imshow(stretched_image, cmap="gray")
+            axes[0, 1].set_title("Stretched Image")
+            axes[0, 1].axis("off")
+
+            # Orijinal görüntü histogramı
+            axes[1, 0].plot(calculate_histogram(gray_image), color="blue")
+            axes[1, 0].set_title("Original Image Histogram")
+            axes[1, 0].set_xlabel("Pixel Value")
+            axes[1, 0].set_ylabel("Frequency")
+
+            # Gerilmiş görüntü histogramı
+            axes[1, 1].plot(calculate_histogram(stretched_image), color="red")
+            axes[1, 1].set_title("Stretched Image Histogram")
+            axes[1, 1].set_xlabel("Pixel Value")
+            axes[1, 1].set_ylabel("Frequency")
+
+            plt.tight_layout()
+            plt.show()
+
         elif selected_function == "Konvolüsyon İşlemi(Mean Filtresi)":
             original_image = cv2.imread(self.image_path)
             # Ortalama filtre için kernel tanımlayalım

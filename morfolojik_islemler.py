@@ -59,10 +59,10 @@ def kapama(image, kernel):
     return output
 
 # Örnek kullanım
-image_path = "/Users/sevvalgencel/Desktop/X/kedy.jpg"
+image_path = "/Users/sevvalgencel/Desktop/X/ornek.jpg"
 kernel = np.ones((3, 3), np.uint8)
 
-# Her bir işlem için işlem adını ve işlem fonksiyonunu belirterek işlemi uygula ve göster
+# Her bir işlem için işlem adını ve işlem fonksiyonunu belirterek işlemi uygula
 operations = [
     ("Genisleme", genisleme),
     ("Asinma", asinma),
@@ -73,8 +73,8 @@ operations = [
 # Orijinal görüntüyü yükle
 original_image = cv2.imread(image_path)
 
-# Orijinal görüntüyü ekrana yazdır
-plt.figure(figsize=(10, 6))
+# Orijinal görüntüyü göster
+plt.figure(figsize=(15, 10))
 plt.subplot(1, len(operations) + 1, 1)
 plt.imshow(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
 plt.title("Orijinal")

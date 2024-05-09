@@ -41,7 +41,7 @@ def histogram_stretching(image):
     return stretched_image.astype(np.uint8)
 
 # Görüntünün dosya yolunu belirle
-path = "/Users/sevvalgencel/Desktop/X/ornek.jpg"
+path = "/Users/sevvalgencel/Desktop/X/kedy.jpg"
 
 # Renkli görüntüyü yükle
 original_image = cv2.imread(path)

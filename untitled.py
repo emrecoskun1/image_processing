@@ -26,6 +26,8 @@ from convolution import convolution
 from filtre_unsharp import unsharp_mask
 from histogram_germe import histogram_stretching
 from histogram_germe import calculate_histogram
+from tek_esikleme import threshold
+from renk_uzayi_hsv import convert_rgb_to_hsv
 
 
 class ImageProcessingApp(QWidget):
@@ -49,21 +51,23 @@ class ImageProcessingApp(QWidget):
 
         self.parameter_label_contrast = QLabel("Kontrast değerini giriniz :", self)
         self.parameter_label_contrast.hide()
-
         self.parameter_input_contrast = QLineEdit(self)
         self.parameter_input_contrast.hide()
 
         self.parameter_label_angel = QLabel("Açı (sadece döndürme için):", self)
         self.parameter_label_angel.hide()
-
         self.parameter_input_angel = QLineEdit(self)
         self.parameter_input_angel.hide()
 
         self.parameter_label_zoom = QLabel("Yaklaştırma faktörünü giriniz : ", self)
         self.parameter_label_zoom.hide()
-
         self.parameter_input_zoom = QLineEdit(self)
         self.parameter_input_zoom.hide()
+
+        self.parameter_label_threshold = QLabel("Eşik değerini giriniz :", self)
+        self.parameter_label_threshold.hide()
+        self.parameter_input_threshold = QLineEdit(self)
+        self.parameter_input_threshold.hide()
 
         self.parameter_label_crop = QLabel(
             "Kırpmak için x1,x2,y1,y2 değerlerini giriniz(Bu değerler x2-x1,y2-y1 şeklinde hesaplanıyor.) ",
@@ -88,6 +92,8 @@ class ImageProcessingApp(QWidget):
         self.function_selector.addItem("Konvolüsyon İşlemi(Mean Filtresi)")
         self.function_selector.addItem("Unsharp Filtresi")
         self.function_selector.addItem("Histogram Germe")
+        self.function_selector.addItem("Tek Eşikleme")
+        self.function_selector.addItem("RGB den HSV renk uzayına dönüşüm")
         self.function_selector.currentIndexChanged.connect(self.show_parameter_input)
 
         layout = QVBoxLayout()
@@ -100,6 +106,8 @@ class ImageProcessingApp(QWidget):
         layout.addWidget(self.parameter_input_zoom)
         layout.addWidget(self.parameter_label_crop)
         layout.addWidget(self.parameter_input_crop)
+        layout.addWidget(self.parameter_label_threshold)
+        layout.addWidget(self.parameter_input_threshold)
         layout.addWidget(self.resolution_label)
         layout.addWidget(self.image_label)
         layout.addWidget(self.function_selector)
@@ -166,6 +174,39 @@ class ImageProcessingApp(QWidget):
         elif selected_function == "Kenar Bulma (Prewitt)":
             prewitt_image = prewitt_edge_detection(self.image_path)
             prewitt_image.show()
+        elif selected_function == "RGB den HSV renk uzayına dönüşüm":
+            image = cv2.imread(self.image_path)
+            hsv_image = convert_rgb_to_hsv(image)
+            cv2.imshow("HSV Image", hsv_image)
+        elif selected_function == "Tek Eşikleme":
+            # Eşik değerini kullanıcıdan alma
+            threshold_value_text = self.parameter_input_threshold.text()
+
+            # Eşik değerinin boş olup olmadığını kontrol etme
+            if not threshold_value_text:
+                QMessageBox.warning(self, "Uyarı", "Lütfen bir eşik değeri girin.")
+                return
+
+            # Eşik değerini tam sayıya dönüştürme
+            try:
+                threshold_value = int(threshold_value_text)
+            except ValueError:
+                QMessageBox.warning(
+                    self, "Uyarı", "Lütfen geçerli bir tam sayı eşik değeri girin."
+                )
+                return
+
+            # Görüntüyü yükleme
+            image = cv2.imread(self.image_path, cv2.IMREAD_GRAYSCALE)
+
+            # Eşikleme işlemini uygulama
+            thresholded_image = threshold(image, threshold_value)
+
+            # Eşiklenmiş görüntüyü gösterme
+            plt.imshow(thresholded_image, cmap="gray")
+            plt.title("Eşiklenmiş Görüntü (Eşik Değeri = {})".format(threshold_value))
+            plt.axis("off")
+            plt.show()
         elif selected_function == "Unsharp Filtresi":
             image = cv2.imread(self.image_path, cv2.IMREAD_GRAYSCALE)
             filtered_image = unsharp_mask(
@@ -279,6 +320,9 @@ class ImageProcessingApp(QWidget):
         self.parameter_label_zoom.hide()
         self.parameter_input_crop.hide()
         self.parameter_label_crop.hide()
+        self.parameter_input_threshold.hide()
+        self.parameter_label_threshold.hide()
+
         if selected_function == "Fotoğraf Döndürme":
             self.parameter_label_angel.show()
             self.parameter_input_angel.show()
@@ -291,6 +335,9 @@ class ImageProcessingApp(QWidget):
         elif selected_function == "Fotoğraf Kırpma":
             self.parameter_input_crop.show()
             self.parameter_label_crop.show()
+        elif selected_function == "Tek Eşikleme":
+            self.parameter_input_threshold.show()
+            self.parameter_label_threshold.show()
 
 
 if __name__ == "__main__":

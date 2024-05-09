@@ -28,6 +28,7 @@ from histogram_germe import histogram_stretching
 from histogram_germe import calculate_histogram
 from tek_esikleme import threshold
 from renk_uzayi_hsv import convert_rgb_to_hsv
+from arithmetic_operations_merge import merge_images
 
 
 class ImageProcessingApp(QWidget):
@@ -37,17 +38,30 @@ class ImageProcessingApp(QWidget):
         self.setWindowTitle("Görüntü İşleme Uygulaması")
         self.setGeometry(100, 100, 400, 400)
 
-        self.resolution_label = QLabel(self)  # QLabel öğesinin oluşturulması
+        self.resolution_label = QLabel(self)
+        self.resolution_label2 = QLabel(self)  # QLabel öğesinin oluşturulması
         self.resolution_label.setAlignment(Qt.AlignCenter | Qt.AlignTop)
         self.resolution_label.setStyleSheet(
+            "font-weight: bold; font-size: 9px; color: red;"
+        )
+        self.resolution_label2.setAlignment(Qt.AlignCenter | Qt.AlignTop)
+        self.resolution_label2.setStyleSheet(
             "font-weight: bold; font-size: 9px; color: red;"
         )  # Metnin stilinin ayarlanması
 
         self.image_label = QLabel(self)
         self.image_label.setAlignment(Qt.AlignCenter)
+        self.image_label2 = QLabel(self)
+        self.image_label2.setAlignment(Qt.AlignCenter)
 
         self.select_button = QPushButton("Dosya Seç", self)
         self.select_button.clicked.connect(self.select_image)
+
+        self.select_button2 = QPushButton("Dosya Seç (Görüntü 2)", self)
+        self.select_button2.hide()
+        self.select_button2.clicked.connect(
+            self.select_image2
+        )  # Başlangıçta gizli olacak
 
         self.parameter_label_contrast = QLabel("Kontrast değerini giriniz :", self)
         self.parameter_label_contrast.hide()
@@ -94,10 +108,12 @@ class ImageProcessingApp(QWidget):
         self.function_selector.addItem("Histogram Germe")
         self.function_selector.addItem("Tek Eşikleme")
         self.function_selector.addItem("RGB den HSV renk uzayına dönüşüm")
+        self.function_selector.addItem("Aritmetik İşlemler(Ekleme)")
         self.function_selector.currentIndexChanged.connect(self.show_parameter_input)
 
         layout = QVBoxLayout()
         layout.addWidget(self.select_button)
+        layout.addWidget(self.select_button2)
         layout.addWidget(self.parameter_label_angel)
         layout.addWidget(self.parameter_input_angel)
         layout.addWidget(self.parameter_label_contrast)
@@ -109,7 +125,9 @@ class ImageProcessingApp(QWidget):
         layout.addWidget(self.parameter_label_threshold)
         layout.addWidget(self.parameter_input_threshold)
         layout.addWidget(self.resolution_label)
+        layout.addWidget(self.resolution_label2)
         layout.addWidget(self.image_label)
+        layout.addWidget(self.image_label2)
         layout.addWidget(self.function_selector)
         layout.addWidget(self.process_button)
 
@@ -142,6 +160,32 @@ class ImageProcessingApp(QWidget):
             self.resolution_label.setText(
                 resolution_text
             )  # resolution_label adında bir QLabel öğesine yazdırın veya başka bir şekilde çözünürlüğü göstereceğiniz bir öğe varsa onu kullanın.
+
+    def select_image2(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        file_name2, _ = QFileDialog.getOpenFileName(
+            self,
+            "Görüntü Seç",
+            "",
+            "Resim Dosyaları (*.jpg *.png *.tif)",
+            options=options,
+        )
+        if file_name2:
+            pixmap = QPixmap(file_name2)
+            self.image_label2.setPixmap(pixmap.scaledToWidth(300))
+            self.image_path2 = file_name2
+
+            # Resmi yükle
+            image = QImage(file_name2)
+
+            # Çözünürlüğü al
+            width = image.width()
+            height = image.height()
+
+            # Çözünürlüğü ekrana yazdır
+            resolution_text2 = f"2. Fotografın Çözünürlük: {width}x{height}"
+            self.resolution_label2.setText(resolution_text2)
 
     def process_image(self):
         if not hasattr(self, "image_path"):
@@ -178,6 +222,15 @@ class ImageProcessingApp(QWidget):
             image = cv2.imread(self.image_path)
             hsv_image = convert_rgb_to_hsv(image)
             cv2.imshow("HSV Image", hsv_image)
+        elif selected_function == "Aritmetik İşlemler(Ekleme)":
+            image1_path = self.image_path
+            image2_path = self.image_path2
+            result_image = merge_images(image1_path, image2_path)
+            if result_image is not None:
+                cv2.imshow("Merge Image", result_image)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+
         elif selected_function == "Tek Eşikleme":
             # Eşik değerini kullanıcıdan alma
             threshold_value_text = self.parameter_input_threshold.text()
@@ -248,6 +301,7 @@ class ImageProcessingApp(QWidget):
             plt.show()
 
         elif selected_function == "Konvolüsyon İşlemi(Mean Filtresi)":
+            self.image_label2.hide()
             original_image = cv2.imread(self.image_path)
             # Ortalama filtre için kernel tanımlayalım
             kernel = np.ones((3, 3), np.float32) / 9
@@ -322,22 +376,39 @@ class ImageProcessingApp(QWidget):
         self.parameter_label_crop.hide()
         self.parameter_input_threshold.hide()
         self.parameter_label_threshold.hide()
+        self.select_button2.hide()
+        self.resolution_label2.hide()
 
         if selected_function == "Fotoğraf Döndürme":
             self.parameter_label_angel.show()
             self.parameter_input_angel.show()
+            self.image_label2.hide()
+        if selected_function == "Binary Dönüşüm":
+            self.image_label2.hide()
+        elif selected_function == "Unsharp Filtresi":
+            self.image_label2.hide()
         elif selected_function == "Kontrast Arttırma/Azaltma":
             self.parameter_label_contrast.show()
             self.parameter_input_contrast.show()
+            self.image_label2.hide()
         elif selected_function == "Yakınlaştırma ve Uzaklaştırma":
             self.parameter_input_zoom.show()
             self.parameter_label_zoom.show()
+            self.image_label2.hide()
         elif selected_function == "Fotoğraf Kırpma":
             self.parameter_input_crop.show()
             self.parameter_label_crop.show()
+            self.image_label2.hide()
+        elif selected_function == "Kenar Bulma (Prewitt)":
+            self.image_label2.hide()
         elif selected_function == "Tek Eşikleme":
             self.parameter_input_threshold.show()
             self.parameter_label_threshold.show()
+            self.image_label2.hide()
+        elif selected_function == "Aritmetik İşlemler(Ekleme)":
+            self.image_label2.show()
+            self.select_button2.show()
+            self.resolution_label2.show()
 
 
 if __name__ == "__main__":

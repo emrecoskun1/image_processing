@@ -29,6 +29,7 @@ from histogram_germe import calculate_histogram
 from tek_esikleme import threshold
 from renk_uzayi_hsv import convert_rgb_to_hsv
 from arithmetic_operations_merge import merge_images
+from morfolojik_islemler import *
 
 
 class ImageProcessingApp(QWidget):
@@ -97,7 +98,7 @@ class ImageProcessingApp(QWidget):
 
         self.function_selector = QComboBox(self)
         self.function_selector.addItem("Binary Dönüşüm")
-        self.function_selector.addItem("Grayscale Dönüşüm")
+        self.function_selector.addItem("Gri Dönüşüm")
         self.function_selector.addItem("Fotoğraf Döndürme")
         self.function_selector.addItem("Kontrast Arttırma/Azaltma")
         self.function_selector.addItem("Yakınlaştırma ve Uzaklaştırma")
@@ -109,6 +110,9 @@ class ImageProcessingApp(QWidget):
         self.function_selector.addItem("Tek Eşikleme")
         self.function_selector.addItem("RGB den HSV renk uzayına dönüşüm")
         self.function_selector.addItem("Aritmetik İşlemler(Ekleme)")
+        self.function_selector.addItem(
+            "Morfolojik İşlemler(Genişleme,Aşınma,Açma,Kapama)"
+        )
         self.function_selector.currentIndexChanged.connect(self.show_parameter_input)
 
         layout = QVBoxLayout()
@@ -197,7 +201,7 @@ class ImageProcessingApp(QWidget):
             threshold_value = 128
             binary_image = convert_to_binary(self.image_path, threshold_value)
             binary_image.show()
-        elif selected_function == "Grayscale Dönüşüm":
+        elif selected_function == "Gri Dönüşüm":
             image = cv2.imread(self.image_path)
             gray_image = convert_gray(image)
             cv2.imshow("Grayscale Image", gray_image)
@@ -222,6 +226,27 @@ class ImageProcessingApp(QWidget):
             image = cv2.imread(self.image_path)
             hsv_image = convert_rgb_to_hsv(image)
             cv2.imshow("HSV Image", hsv_image)
+        elif selected_function == ("Morfolojik İşlemler(Genişleme,Aşınma,Açma,Kapama)"):
+            image = cv2.imread(self.image_path)
+            kernel = np.ones((3, 3), np.uint8)
+            # Orijinal görüntüyü yükle
+
+            # Orijinal görüntüyü ekrana yazdır
+            plt.figure(figsize=(10, 6))
+            plt.subplot(1, len(operations) + 1, 1)
+            plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            plt.title("Orijinal")
+            plt.axis("off")
+
+            # Tüm işlemleri uygula ve göster
+            for idx, (operation_name, operation_func) in enumerate(operations):
+                processed_image = operation_func(image, kernel)
+                plt.subplot(1, len(operations) + 1, idx + 2)
+                plt.imshow(cv2.cvtColor(processed_image, cv2.COLOR_BGR2RGB))
+                plt.title(operation_name)
+                plt.axis("off")
+
+            plt.show()
         elif selected_function == "Aritmetik İşlemler(Ekleme)":
             image1_path = self.image_path
             image2_path = self.image_path2
@@ -409,6 +434,8 @@ class ImageProcessingApp(QWidget):
             self.image_label2.show()
             self.select_button2.show()
             self.resolution_label2.show()
+        elif selected_function == "Morfolojik İşlemler(Genişleme,Aşınma,Açma,Kapama)":
+            self.image_label2.hide()
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 from PIL import Image
 
+
 def zoom_image(image_path, scale_factor):
     # Resmi aç
     image = Image.open(image_path)

@@ -24,11 +24,10 @@ from prewitt_edge_detection import prewitt_edge_detection
 from imagecrop import custom_crop
 from convolution import convolution
 from filtre_unsharp import unsharp_mask
-from histogram_germe import histogram_stretching
-from histogram_germe import calculate_histogram
+from histogram_germe import histogram_stretching, calculate_histogram
 from tek_esikleme import threshold
 from renk_uzayi_hsv import convert_rgb_to_hsv
-from arithmetic_operations_merge import merge_images
+from arithmetic_operations_merge import merge_images, divide_images
 from morfolojik_islemler import *
 from salt_pepper_mean_median import *
 
@@ -70,7 +69,9 @@ class ImageProcessingApp(QWidget):
         self.parameter_input_contrast = QLineEdit(self)
         self.parameter_input_contrast.hide()
 
-        self.parameter_label_angel = QLabel("Açı (sadece döndürme için):", self)
+        self.parameter_label_angel = QLabel(
+            "Açı (saat yönünün tersine döndürür):", self
+        )
         self.parameter_label_angel.hide()
         self.parameter_input_angel = QLineEdit(self)
         self.parameter_input_angel.hide()
@@ -86,13 +87,15 @@ class ImageProcessingApp(QWidget):
         self.parameter_input_threshold.hide()
 
         self.parameter_label_density = QLabel(
-            "Gürültü Seviyesini giriniz (1-'Girilen değer ' şeklinde hesaplanıyor.(0,01 girmeniz önerilir.)):"
+            "Gürültü Seviyesini giriniz (1-'Girilen değer ' şeklinde hesaplanıyor.(0,01 vs.)):"
         )
         self.parameter_label_density.hide()
         self.parameter_input_density = QLineEdit(self)
         self.parameter_input_density.hide()
 
-        self.parameter_label_filter = QLabel("Filtre boyutunu giriniz(9 veya 25) :")
+        self.parameter_label_filter = QLabel(
+            "Filtre boyutunu giriniz(3,5 gibi 5 girdiğinizde 5*5 matris oluşturmuş olursunuz.) :"
+        )
         self.parameter_label_filter.hide()
         self.parameter_input_filter = QLineEdit(self)
         self.parameter_input_filter.hide()
@@ -122,7 +125,7 @@ class ImageProcessingApp(QWidget):
         self.function_selector.addItem("Histogram Germe")
         self.function_selector.addItem("Tek Eşikleme")
         self.function_selector.addItem("RGB den HSV renk uzayına dönüşüm")
-        self.function_selector.addItem("Aritmetik İşlemler(Ekleme)")
+        self.function_selector.addItem("Aritmetik İşlemler(Ekleme, Bölme)")
         self.function_selector.addItem(
             "Morfolojik İşlemler(Genişleme,Aşınma,Açma,Kapama)"
         )
@@ -299,12 +302,12 @@ class ImageProcessingApp(QWidget):
 
             # display 5x5 median filter
             fig.add_subplot(2, 2, 3)
-            plt.title("5x5 Mean Filter")
+            plt.title("Mean Filter")
             plt.imshow(mean_5x5_lena, cmap="gray")
 
             # display 5x5 median filter
             fig.add_subplot(2, 2, 4)
-            plt.title("5x5 Median Filter")
+            plt.title("Median Filter")
             plt.imshow(median_5x5_lena, cmap="gray")
 
             plt.show()
@@ -333,12 +336,14 @@ class ImageProcessingApp(QWidget):
                 plt.axis("off")
 
             plt.show()
-        elif selected_function == "Aritmetik İşlemler(Ekleme)":
+        elif selected_function == "Aritmetik İşlemler(Ekleme, Bölme)":
             image1_path = self.image_path
             image2_path = self.image_path2
-            result_image = merge_images(image1_path, image2_path)
-            if result_image is not None:
-                cv2.imshow("Merge Image", result_image)
+            result_image_merge = merge_images(image1_path, image2_path)
+            result_image_divide = divide_images(image1_path, image2_path)
+            if result_image_merge is not None:
+                cv2.imshow("Divide İmage", result_image_divide)
+                cv2.imshow("Merge Image", result_image_merge)
                 cv2.waitKey(0)
                 cv2.destroyAllWindows()
 
@@ -520,7 +525,7 @@ class ImageProcessingApp(QWidget):
             self.parameter_input_threshold.show()
             self.parameter_label_threshold.show()
             self.image_label2.hide()
-        elif selected_function == "Aritmetik İşlemler(Ekleme)":
+        elif selected_function == "Aritmetik İşlemler(Ekleme, Bölme)":
             self.image_label2.show()
             self.select_button2.show()
             self.resolution_label2.show()

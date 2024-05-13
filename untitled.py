@@ -30,6 +30,7 @@ from tek_esikleme import threshold
 from renk_uzayi_hsv import convert_rgb_to_hsv
 from arithmetic_operations_merge import merge_images
 from morfolojik_islemler import *
+from salt_pepper_mean_median import *
 
 
 class ImageProcessingApp(QWidget):
@@ -84,6 +85,18 @@ class ImageProcessingApp(QWidget):
         self.parameter_input_threshold = QLineEdit(self)
         self.parameter_input_threshold.hide()
 
+        self.parameter_label_density = QLabel(
+            "Gürültü Seviyesini giriniz (1-'Girilen değer ' şeklinde hesaplanıyor.(0,01 girmeniz önerilir.)):"
+        )
+        self.parameter_label_density.hide()
+        self.parameter_input_density = QLineEdit(self)
+        self.parameter_input_density.hide()
+
+        self.parameter_label_filter = QLabel("Filtre boyutunu giriniz(9 veya 25) :")
+        self.parameter_label_filter.hide()
+        self.parameter_input_filter = QLineEdit(self)
+        self.parameter_input_filter.hide()
+
         self.parameter_label_crop = QLabel(
             "Kırpmak için x1,x2,y1,y2 değerlerini giriniz(Bu değerler x2-x1,y2-y1 şeklinde hesaplanıyor.) ",
             self,
@@ -113,6 +126,9 @@ class ImageProcessingApp(QWidget):
         self.function_selector.addItem(
             "Morfolojik İşlemler(Genişleme,Aşınma,Açma,Kapama)"
         )
+        self.function_selector.addItem(
+            "Gürültü ekleme(Salt&Pepper) ve Filtre ile temizleme(Mean Median)"
+        )
         self.function_selector.currentIndexChanged.connect(self.show_parameter_input)
 
         layout = QVBoxLayout()
@@ -128,6 +144,10 @@ class ImageProcessingApp(QWidget):
         layout.addWidget(self.parameter_input_crop)
         layout.addWidget(self.parameter_label_threshold)
         layout.addWidget(self.parameter_input_threshold)
+        layout.addWidget(self.parameter_label_density)
+        layout.addWidget(self.parameter_input_density)
+        layout.addWidget(self.parameter_label_filter)
+        layout.addWidget(self.parameter_input_filter)
         layout.addWidget(self.resolution_label)
         layout.addWidget(self.resolution_label2)
         layout.addWidget(self.image_label)
@@ -222,6 +242,72 @@ class ImageProcessingApp(QWidget):
         elif selected_function == "Kenar Bulma (Prewitt)":
             prewitt_image = prewitt_edge_detection(self.image_path)
             prewitt_image.show()
+        elif (
+            selected_function
+            == "Gürültü ekleme(Salt&Pepper) ve Filtre ile temizleme(Mean Median)"
+        ):
+            density_text = self.parameter_input_density.text()
+            density = (
+                float(density_text) if density_text else 0.0
+            )  # Varsayılan değer olarak 0.0 kullanılabilir
+            filter_text = self.parameter_input_filter.text()
+            filter_size = (
+                int(filter_text) if filter_text else 0
+            )  # Varsayılan olarak 0 kullanılabilir
+
+            gray_lena = cv2.imread(self.image_path, 0)
+
+            # add salt and paper (0.01 is a proper parameter)
+            noise_lena = SaltAndPaper(gray_lena, density)
+
+            # # use 3x3 mean filter
+            # mean_3x3_lena = MeanFilter(noise_lena, 9)
+
+            # # use 3x3 median filter
+            # median_3x3_lena = MedianFilter(noise_lena, 9)
+
+            # use 5x5 mean filter
+            mean_5x5_lena = MeanFilter(noise_lena, filter_size)
+
+            # use 5x5 median filter
+            median_5x5_lena = MedianFilter(noise_lena, filter_size)
+
+            # set up side-by-side image display
+            fig = plt.figure()
+            fig.set_figheight(10)
+            fig.set_figwidth(8)
+
+            # display the oringinal image
+            fig.add_subplot(2, 2, 1)
+            plt.title("Original Image")
+            plt.imshow(gray_lena, cmap="gray")
+
+            # display the salt and paper image
+            fig.add_subplot(2, 2, 2)
+            plt.title("Adding Salt & Paper Image")
+            plt.imshow(noise_lena, cmap="gray")
+
+            # # display 3x3 mean filter
+            # fig.add_subplot(3, 2, 3)
+            # plt.title("3x3 Mean Filter")
+            # plt.imshow(mean_3x3_lena, cmap="gray")
+
+            # # display 3x3 median filter
+            # fig.add_subplot(3, 2, 4)
+            # plt.title("3x3 Median Filter")
+            # plt.imshow(median_3x3_lena, cmap="gray")
+
+            # display 5x5 median filter
+            fig.add_subplot(2, 2, 3)
+            plt.title("5x5 Mean Filter")
+            plt.imshow(mean_5x5_lena, cmap="gray")
+
+            # display 5x5 median filter
+            fig.add_subplot(2, 2, 4)
+            plt.title("5x5 Median Filter")
+            plt.imshow(median_5x5_lena, cmap="gray")
+
+            plt.show()
         elif selected_function == "RGB den HSV renk uzayına dönüşüm":
             image = cv2.imread(self.image_path)
             hsv_image = convert_rgb_to_hsv(image)
@@ -401,6 +487,10 @@ class ImageProcessingApp(QWidget):
         self.parameter_label_crop.hide()
         self.parameter_input_threshold.hide()
         self.parameter_label_threshold.hide()
+        self.parameter_input_density.hide()
+        self.parameter_label_density.hide()
+        self.parameter_input_filter.hide()
+        self.parameter_label_filter.hide()
         self.select_button2.hide()
         self.resolution_label2.hide()
 
@@ -435,6 +525,15 @@ class ImageProcessingApp(QWidget):
             self.select_button2.show()
             self.resolution_label2.show()
         elif selected_function == "Morfolojik İşlemler(Genişleme,Aşınma,Açma,Kapama)":
+            self.image_label2.hide()
+        elif (
+            selected_function
+            == "Gürültü ekleme(Salt&Pepper) ve Filtre ile temizleme(Mean Median)"
+        ):
+            self.parameter_label_filter.show()
+            self.parameter_input_filter.show()
+            self.parameter_label_density.show()
+            self.parameter_input_density.show()
             self.image_label2.hide()
 
 

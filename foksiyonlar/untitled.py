@@ -48,7 +48,7 @@ class ImageProcessingApp(QWidget):
         self.resolution_label2.setAlignment(Qt.AlignCenter | Qt.AlignTop)
         self.resolution_label2.setStyleSheet(
             "font-weight: bold; font-size: 9px; color: red;"
-        )  # Metnin stilinin ayarlanması
+        )
 
         self.image_label = QLabel(self)
         self.image_label.setAlignment(Qt.AlignCenter)
@@ -60,9 +60,7 @@ class ImageProcessingApp(QWidget):
 
         self.select_button2 = QPushButton("Dosya Seç (Görüntü 2)", self)
         self.select_button2.hide()
-        self.select_button2.clicked.connect(
-            self.select_image2
-        )  # Başlangıçta gizli olacak
+        self.select_button2.clicked.connect(self.select_image2)
 
         self.parameter_label_contrast = QLabel("Kontrast değerini giriniz :", self)
         self.parameter_label_contrast.hide()
@@ -112,6 +110,7 @@ class ImageProcessingApp(QWidget):
         self.process_button = QPushButton("Görüntüyü İşle", self)
         self.process_button.clicked.connect(self.process_image)
 
+        # Combobox a fonskiyonları ekleme kısmı.
         self.function_selector = QComboBox(self)
         self.function_selector.addItem("Binary Dönüşüm")
         self.function_selector.addItem("Gri Dönüşüm")
@@ -175,18 +174,13 @@ class ImageProcessingApp(QWidget):
             self.image_label.setPixmap(pixmap.scaledToWidth(300))
             self.image_path = file_name
 
-            # Resmi yükle
             image = QImage(file_name)
 
-            # Çözünürlüğü al
             width = image.width()
             height = image.height()
 
-            # Çözünürlüğü ekrana yazdır
             resolution_text = f"Çözünürlük: {width}x{height}"
-            self.resolution_label.setText(
-                resolution_text
-            )  # resolution_label adında bir QLabel öğesine yazdırın veya başka bir şekilde çözünürlüğü göstereceğiniz bir öğe varsa onu kullanın.
+            self.resolution_label.setText(resolution_text)
 
     def select_image2(self):
         options = QFileDialog.Options()
@@ -206,11 +200,9 @@ class ImageProcessingApp(QWidget):
             # Resmi yükle
             image = QImage(file_name2)
 
-            # Çözünürlüğü al
             width = image.width()
             height = image.height()
 
-            # Çözünürlüğü ekrana yazdır
             resolution_text2 = f"2. Fotografın Çözünürlük: {width}x{height}"
             self.resolution_label2.setText(resolution_text2)
 
@@ -245,37 +237,32 @@ class ImageProcessingApp(QWidget):
         elif selected_function == "Kenar Bulma (Prewitt)":
             prewitt_image = prewitt_edge_detection(self.image_path)
             prewitt_image.show()
+        # density gürültü seviyesini temsil ediyor
         elif (
             selected_function
             == "Gürültü ekleme(Salt&Pepper) ve Filtre ile temizleme(Mean Median)"
         ):
             density_text = self.parameter_input_density.text()
-            density = (
-                float(density_text) if density_text else 0.0
-            )  # Varsayılan değer olarak 0.0 kullanılabilir
+            density = float(density_text) if density_text else 0.01
             filter_text = self.parameter_input_filter.text()
-            filter_size = (
-                int(filter_text) if filter_text else 0
-            )  # Varsayılan olarak 0 kullanılabilir
+            filter_size = int(filter_text) if filter_text else 0
 
             gray_lena = cv2.imread(self.image_path, 0)
 
             # add salt and paper (0.01 is a proper parameter)
             noise_lena = SaltAndPaper(gray_lena, density)
 
-            # # use 3x3 mean filter
+            #  3x3 mean görüntü
             # mean_3x3_lena = MeanFilter(noise_lena, 9)
 
-            # # use 3x3 median filter
+            # 3x3 median görüntü
             # median_3x3_lena = MedianFilter(noise_lena, 9)
 
-            # use 5x5 mean filter
             mean_5x5_lena = MeanFilter(noise_lena, filter_size)
 
             # use 5x5 median filter
             median_5x5_lena = MedianFilter(noise_lena, filter_size)
 
-            # set up side-by-side image display
             fig = plt.figure()
             fig.set_figheight(10)
             fig.set_figwidth(8)
@@ -419,37 +406,30 @@ class ImageProcessingApp(QWidget):
         elif selected_function == "Konvolüsyon İşlemi(Mean Filtresi)":
             self.image_label2.hide()
             original_image = cv2.imread(self.image_path)
-            # Ortalama filtre için kernel tanımlayalım
+            # Ortalama filtre için kernel tanımlama
             kernel = np.ones((3, 3), np.float32) / 9
 
-            # Gürültülü resmi yükleyelim
             gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
             noisy_image = gray_image + np.random.normal(0, 25, gray_image.shape).astype(
                 np.uint8
             )
 
-            # Ortalama filtre uygulayalım
             mean_filtered_image = convolution(noisy_image, kernel)
 
             fig, axs = plt.subplots(1, 4, figsize=(20, 5))
 
-            # Orijinal resmi göster
             axs[0].imshow(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
             axs[0].set_title("Orijinal Resim")
 
-            # Gri tonlamalı resmi göster
             axs[1].imshow(gray_image, cmap="gray")
             axs[1].set_title("Gri Tonlamalı Resim")
 
-            # Gürültülü resmi göster
             axs[2].imshow(noisy_image, cmap="gray")
             axs[2].set_title("Gürültülü Resim")
 
-            # Ortalama filtre uygulanmış resmi göster
             axs[3].imshow(mean_filtered_image, cmap="gray")
             axs[3].set_title("Ortalama Filtre Uygulanmış Resim")
 
-            # Alt resimler arasındaki boşlukları sıkıştır
             plt.tight_layout()
 
             # Görüntüleri göster
